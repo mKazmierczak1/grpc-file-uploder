@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package file.upload;
+
+import "file.proto";
+
+option java_package = "org.example";
+option java_multiple_files = true;
+
+message FileUploadRequest {
+  oneof request {
+    MetaData metadata = 1;
+    File file = 2;
+  }
+}
+
+message FileUploadResponse {
+  string name = 1;
+  Status status = 2;
+}
+
+service FileService {
+  rpc upload(stream FileUploadRequest) returns(FileUploadResponse);
+}

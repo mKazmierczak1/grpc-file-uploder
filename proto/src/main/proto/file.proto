@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package file.upload;
+
+option java_package = "org.example";
+option java_multiple_files = true;
+
+message MetaData {
+  string name = 1;
+  string type = 2;
+}
+
+message File {
+  bytes content = 1;
+}
+
+enum Status {
+  PENDING = 0;
+  IN_PROGRESS = 1;
+  SUCCESS = 2;
+  FAILED = 3;
+}
