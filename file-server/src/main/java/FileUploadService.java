@@ -5,10 +5,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import org.example.FileServiceGrpc;
-import org.example.FileUploadRequest;
-import org.example.FileUploadResponse;
-import org.example.Status;
+import org.example.*;
 
 public class FileUploadService extends FileServiceGrpc.FileServiceImplBase {
 
@@ -55,6 +52,38 @@ public class FileUploadService extends FileServiceGrpc.FileServiceImplBase {
         responseObserver.onCompleted();
       }
     };
+  }
+
+  @Override
+  public void download(
+      FileDownloadRequest request, StreamObserver<FileDownloadResponse> responseObserver) {
+    var fileName = request.getMetadata().getName() + "." + request.getMetadata().getType();
+    System.out.println("Received request for file: " + fileName);
+
+    try {
+      var filePath = SERVER_BASE_PATH.resolve(fileName);
+      var inputStream = Files.newInputStream(filePath);
+      byte[] bytes = new byte[4096];
+      int size;
+
+      while ((size = inputStream.read(bytes)) > 0) {
+        FileDownloadResponse uploadResponse =
+            FileDownloadResponse.newBuilder()
+                .setFile(File.newBuilder().setContent(ByteString.copyFrom(bytes, 0, size)).build())
+                .setStatus(Status.IN_PROGRESS)
+                .build();
+        responseObserver.onNext(uploadResponse);
+      }
+    } catch (Exception e) {
+      var response = FileDownloadResponse.newBuilder().setStatus(Status.FAILED).build();
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
+    }
+
+    responseObserver.onNext(FileDownloadResponse.newBuilder().setStatus(Status.SUCCESS).build());
+
+    System.out.println("File sent!");
+    responseObserver.onCompleted();
   }
 
   private OutputStream getFilePath(FileUploadRequest request) throws IOException {

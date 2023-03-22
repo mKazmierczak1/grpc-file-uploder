@@ -19,6 +19,17 @@ message FileUploadResponse {
   Status status = 2;
 }
 
+message FileDownloadRequest {
+  MetaData metadata = 1;
+}
+
+message FileDownloadResponse {
+  File file = 1;
+  Status status = 2;
+}
+
 service FileService {
-  rpc upload(stream FileUploadRequest) returns(FileUploadResponse);
+  rpc upload(stream FileUploadRequest) returns (FileUploadResponse);
+
+  rpc download(FileDownloadRequest) returns (stream FileDownloadResponse);
 }
